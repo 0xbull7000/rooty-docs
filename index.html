@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rooty.fun · Presale &amp; LP Simulators</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08090c;--panel:#0e1116;--panel-2:#12161d;--line:#1f2630;--line-bright:#2c3644;
+    --ink:#e7edf3;--ink-dim:#8a96a5;--ink-faint:#5b6675;
+    --green:#46d68a;--red:#ff6470;--amber:#f5c451;--blue:#5aa9f0;--violet:#b08cf0;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--disp);line-height:1.5;padding:clamp(16px,4vw,40px)}
+  .wrap{max-width:1140px;margin:0 auto}
+  header{margin-bottom:26px;border-bottom:1px solid var(--line);padding-bottom:20px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:10px}
+  h1{font-size:clamp(25px,5vw,38px);font-weight:700;margin:0 0 6px;letter-spacing:-.02em}
+  .sub{color:var(--ink-dim);font-size:15px;max-width:64ch}
+  h2{font-size:13px;font-family:var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-dim);margin:32px 0 14px;font-weight:500;display:flex;align-items:center;gap:10px}
+  h2::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  .page-tabs{margin-bottom:18px}
+  .tab-head[hidden]{display:none!important}
+
+  .assume{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px}
+  .field label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px}
+  .field input,.field select{width:100%;background:var(--bg);border:1px solid var(--line-bright);border-radius:7px;color:var(--ink);font-family:var(--mono);font-size:15px;padding:9px 11px;outline:none}
+  .field input:focus,.field select:focus{border-color:var(--amber)}
+  .field input[type=range]{padding:0;height:30px;accent-color:var(--amber)}
+  .field .rv{font-family:var(--mono);font-size:13px;color:var(--amber);float:right}
+
+  .derived{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:14px}
+  .dcell{background:var(--panel-2);padding:14px 16px}
+  .dcell .k{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:5px}
+  .dcell .v{font-family:var(--mono);font-size:18px;font-weight:500}
+  .dcell .v.spot{color:var(--red)}
+  .dcell .v.yield{color:var(--green)}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:14px}
+  .card{background:var(--panel-2);padding:15px 16px}
+  .card .k{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px}
+  .card .v{font-family:var(--mono);font-size:21px;font-weight:600}
+  .card .v.base{color:var(--blue)}.card .v.share{color:var(--violet)}.card .v.total{color:var(--green)}.card .v.il{color:var(--red)}
+  .card .s{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:3px}
+
+  .finding{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line-bright);border-left:3px solid var(--amber);border-radius:10px;padding:18px 20px;margin-top:14px}
+  .finding p{margin:0;font-size:14.5px}
+  .finding b{color:var(--amber);font-weight:700}
+  .finding .g{color:var(--green);font-weight:600}.finding .r{color:var(--red);font-weight:600}
+
+  .scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;-webkit-overflow-scrolling:touch}
+  table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:13px}
+  th,td{padding:9px 12px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+  thead th{position:sticky;top:0;background:var(--panel-2);color:var(--ink-dim);font-weight:500;font-size:11px;letter-spacing:.05em;border-bottom:1px solid var(--line-bright);z-index:2}
+  tbody tr:last-child td{border-bottom:none}
+  .rowhead{text-align:left;color:var(--ink);background:var(--panel);position:sticky;left:0;z-index:1;font-weight:500;border-right:1px solid var(--line-bright)}
+  thead .rowhead{z-index:3;background:var(--panel-2)}
+  td.profit{color:var(--green)}td.loss{color:var(--red)}td.even{color:var(--amber)}
+  td.base{color:var(--blue)}td.share{color:var(--violet)}td.total{color:var(--green)}
+  tr.hot td.total{color:var(--green);font-weight:700}
+  .col-pivot{box-shadow:inset 2px 0 0 var(--amber)}
+  .summary tr.below td.raise::after{content:" ⚠";color:var(--amber);font-size:11px}
+  .dim{color:var(--ink-faint)}
+
+  .seg{display:inline-flex;background:var(--panel);border:1px solid var(--line-bright);border-radius:9px;padding:3px;gap:2px;margin-bottom:14px;flex-wrap:wrap}
+  .seg button{background:transparent;border:none;color:var(--ink-dim);font-family:var(--mono);font-size:12px;padding:7px 13px;border-radius:6px;cursor:pointer;transition:.12s}
+  .seg button:hover{color:var(--ink)}
+  .seg button.on{background:var(--amber);color:#1a1304;font-weight:700}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--ink-dim);margin:12px 2px 0}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .swatch{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+  .notes{margin-top:32px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 22px}
+  .notes ul{margin:0;padding-left:18px}
+  .notes li{font-size:13.5px;color:var(--ink-dim);margin-bottom:9px}
+  .notes li b{color:var(--ink)}.notes li:last-child{margin-bottom:0}
+  .warn{border-left:3px solid var(--red);background:rgba(255,100,112,.05);padding:14px 16px;border-radius:8px;margin-top:14px;font-size:13.5px;color:var(--ink-dim)}
+  .warn b{color:var(--red)}
+  .caveat{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:16px;line-height:1.7}
+  .panel[hidden]{display:none!important}
+  @media(max-width:560px){th,td{padding:8px 9px;font-size:12px}.dcell .v{font-size:16px}.card .v{font-size:18px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Rooty.fun · token mechanics simulators</div>
+    <div class="seg page-tabs" id="page-tabs">
+      <button type="button" data-page="presale" class="on">Presale Dilution &amp; Yield</button>
+      <button type="button" data-page="lp">LP &amp; Fee-Sharing</button>
+    </div>
+    <div class="tab-head" data-for="presale">
+      <h1>Presale Dilution &amp; Yield Model</h1>
+      <p class="sub">Two valuations side by side: the cold launch-spot price, and the higher market cap the 3-month LP yield stream can support. Move the pass-through slider to see how much of the yield actually converts to price.</p>
+    </div>
+    <div class="tab-head" data-for="lp" hidden>
+      <h1>LP &amp; Fee-Sharing Simulator</h1>
+      <p class="sub">What a liquidity provider actually earns after migration — base swap fees plus the creator's shared rewards — and whether it beats just holding once impermanent loss is counted. Turnover is the master dial.</p>
+    </div>
+  </header>
+
+  <section class="panel" id="panel-presale">
+    <h2>Assumptions</h2>
+    <div class="assume">
+      <div class="field"><label>Total supply</label><input id="supply" type="number" value="1000000000"></div>
+      <div class="field"><label>% sold on curve</label><input id="curvePct" type="number" value="78" step="0.1"></div>
+      <div class="field"><label>Curve target (USDC)</label><input id="curveTarget" type="number" value="12000"></div>
+      <div class="field"><label>Migration mktcap (USDC)</label><input id="migMc" type="number" value="60000"></div>
+      <div class="field"><label>Yield payout (months)</label><input id="months" type="number" value="3" step="0.5"></div>
+      <div class="field"><label>Discount rate (annual %)</label><input id="discount" type="number" value="80"></div>
+      <div class="field"><label>Yield→price pass-through <span class="rv" id="ptv">100%</span></label><input id="passthru" type="range" min="0" max="100" value="100"></div>
+    </div>
+
+    <div class="derived">
+      <div class="dcell"><div class="k">Presale token pool</div><div class="v" id="d-pool">—</div></div>
+      <div class="dcell"><div class="k">Launch price (spot)</div><div class="v" id="d-launch">—</div></div>
+      <div class="dcell"><div class="k">Spot break-even</div><div class="v spot" id="d-be1">—</div></div>
+      <div class="dcell"><div class="k">Yield-adj break-even</div><div class="v yield" id="d-be2">—</div></div>
+      <div class="dcell"><div class="k">Structural floor (max recovery)</div><div class="v" id="d-floor">—</div></div>
+    </div>
+
+    <div class="finding"><p id="presale-finding-text">—</p></div>
+
+    <h2>Per-raise outcome</h2>
+    <p style="color:var(--ink-dim);font-size:13px;margin:-4px 0 14px">Spot P/L is the value at the migration instant. Yield-adj P/L assumes the supported market cap (launch + converted yield) holds long enough to exit into. Both are identical across wallet sizes — they depend only on total raised.</p>
+    <div class="scroll">
+      <table class="summary">
+        <thead><tr>
+          <th class="rowhead">Total raise</th>
+          <th>Eff. price</th>
+          <th>Spot P/L</th>
+          <th>Supported MC</th>
+          <th>Yield-adj P/L</th>
+          <th>LP yield pot</th>
+        </tr></thead>
+        <tbody id="summary-body"></tbody>
+      </table>
+    </div>
+    <div class="legend">
+      <span><i class="swatch" style="background:var(--green)"></i> in profit</span>
+      <span><i class="swatch" style="background:var(--amber)"></i> break-even</span>
+      <span><i class="swatch" style="background:var(--red)"></i> underwater</span>
+      <span class="dim">⚠ below curve target — migration not guaranteed</span>
+    </div>
+
+    <h2>Wallet supply matrix</h2>
+    <div class="seg" id="metric-toggle">
+      <button type="button" data-m="supply" class="on">Supply %</button>
+      <button type="button" data-m="tokens">Tokens</button>
+      <button type="button" data-m="spot">Spot P/L</button>
+      <button type="button" data-m="yield">Yield-adj P/L</button>
+    </div>
+    <p style="color:var(--ink-dim);font-size:13px;margin:-4px 0 14px">Row = wallet commitment (USDC). Column = total raise. Walk down any P/L column: every wallet shares the same fate — size buys a bigger slice, never a better price.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr id="matrix-head"></tr></thead>
+        <tbody id="matrix-body"></tbody>
+      </table>
+    </div>
+
+    <div class="warn">
+      <b>The yield-adjusted number is a peak, not a floor.</b> The support exists only while the 3-month farm runs; presale tokens have no vesting, so the 78% can dump from day one. The supported MC is only reachable if the big holders sit still and you exit into the window — most holders, by definition, cannot all sell at it. Treat yield-adj P/L as a best-case exit, not a settled value.
+    </div>
+
+    <div class="notes">
+      <ul>
+        <li><b>The structural floor is ~(curve %).</b> Presalers fund essentially the whole raise but own only the curve share of supply; the rest is seeded into the AMM as liquidity for tokens they don't hold. So even at 100% pass-through, collective recovery caps at that share — the default 78% means a hard ~−22% ceiling on a large raise, no matter how the yield prices in.</li>
+        <li><b>Pass-through is the real lever.</b> Yield → APR → TVL → price leaks at every step (mercenaries take the USDC and dump the token, impermanent loss, fees, arb). 100% is the theoretical ceiling; 40–70% is closer to lived behaviour. Drag the slider down and watch break-even fall back toward the spot 46.8k.</li>
+        <li><b>Entry price is collective.</b> The 12k buys the curve once; those tokens split pro-rata across the whole raise, so a 10 USDC wallet and a 1,000 USDC wallet enter at the same price and ride the same P/L.</li>
+        <li><b>The excess is recycled, not free.</b> The yield pot is presalers' own money above 12k, paid back out to whoever provides liquidity — themselves if they LP, outsiders if they don't. Yield captured by mercenary LPs is a straight leakage from the presale crowd.</li>
+      </ul>
+      <div class="caveat">Supported MC = launch MC + pass-through × PV(yield pot), PV via midpoint discounting over the payout period. Mechanism model for understanding structure under stated assumptions — not price prediction, not financial advice. Real secondary price is set by reflexive flows, liquidity depth, and actual demand, none of which are modeled.</div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-lp" hidden>
+    <h2>Inputs</h2>
+    <div class="assume">
+      <div class="field"><label>Market cap (USDC)</label><input id="mc" type="number" value="120000"></div>
+      <div class="field"><label>Pool liquidity / TVL (USDC)</label><input id="tvl" type="number" value="40000"></div>
+      <div class="field"><label>Daily volume ÷ MC <span class="rv" id="tov">0.80×</span></label><input id="turnover" type="range" min="0" max="500" value="80"></div>
+      <div class="field"><label>Creator reward share <span class="rv" id="shv">50%</span></label><input id="share" type="range" min="0" max="100" value="50"></div>
+      <div class="field"><label>Pool type</label><select id="pool"><option value="canon">Canonical (0.20% LP)</option><option value="noncanon">Non-canonical (0.25% LP)</option></select></div>
+      <div class="field"><label>Your LP position (USDC)</label><input id="pos" type="number" value="5000"></div>
+      <div class="field"><label>Share duration (days)</label><input id="days" type="number" value="90"></div>
+      <div class="field"><label>Price move over period <span class="rv" id="pmv">0%</span></label><input id="pmove" type="range" min="-95" max="400" value="0"></div>
+    </div>
+
+    <div class="cards">
+      <div class="card"><div class="k">Creator fee rate</div><div class="v" id="c-cfee">—</div><div class="s" id="c-cfee-s">USDC band</div></div>
+      <div class="card"><div class="k">Daily volume</div><div class="v" id="c-vol">—</div></div>
+      <div class="card"><div class="k">Base-fee APR</div><div class="v base" id="c-apr-base">—</div><div class="s">LP swap fee only</div></div>
+      <div class="card"><div class="k">+ Creator-share APR</div><div class="v share" id="c-apr-share">—</div><div class="s">shared rewards</div></div>
+      <div class="card"><div class="k">Total LP APR</div><div class="v total" id="c-apr-total">—</div></div>
+      <div class="card"><div class="k">Impermanent loss</div><div class="v il" id="c-il">—</div><div class="s" id="c-il-s">at price move</div></div>
+    </div>
+
+    <div class="finding"><p id="lp-finding-text">—</p></div>
+
+    <h2>APR by turnover</h2>
+    <p style="color:var(--ink-dim);font-size:13px;margin:-4px 0 14px">The same position across daily-volume-to-marketcap ratios, at current TVL, share %, and pool type. This is the curve that decays as a memecoin cools — read it top-to-bottom as the life of the token.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr>
+          <th class="rowhead">Vol ÷ MC</th><th>Daily volume</th><th>Base APR</th><th>Creator-share APR</th><th>Total APR</th>
+        </tr></thead>
+        <tbody id="sens-body"></tbody>
+      </table>
+    </div>
+
+    <div class="warn">
+      <b>The APR is rented, not owned.</b> It holds only while two things last: high turnover (which decays as attention fades) and the creator's chosen share window. When the share duration ends, total APR drops to the base-fee line — usually too thin to hold mercenary liquidity, so LPs exit and the pool thins exactly when the token is most fragile. Annualizing a launch-week turnover into a headline APR is the standard way these numbers mislead.
+    </div>
+
+    <div class="notes">
+      <ul>
+        <li><b>The creator fee dwarfs the LP fee.</b> Above 59k USDC market cap the creator earns 0.95% of volume vs 0.20% to LPs — so the shared rewards, not base fees, are what make LPing worth it. Slide share to 0% to see how unattractive the base pool is alone.</li>
+        <li><b>APR scales with turnover ÷ TVL.</b> Double the volume or halve the liquidity and APR doubles. Early thin-TVL high-volume windows print absurd APRs that are real for days and gone in weeks.</li>
+        <li><b>Impermanent loss eats directional moves.</b> A token that 5×'s or drops 80% hands LPs meaningful IL versus just holding. Net-vs-HODL below tells you whether the fees covered it.</li>
+        <li><b>Shared rewards are funded by traders, including the arb loop.</b> Creator fees come from volume; a chunk of that volume is canonical-vs-non-canonical arbitrage the structure itself generates. Real fees, partly self-manufactured demand.</li>
+      </ul>
+      <div class="caveat">Creator fee rate from PumpSwap's USDC canonical schedule (last updated May 2026); non-canonical uses 0.25% LP / 0% creator. IL via constant-product formula 2√k/(1+k)−1. Assumes your position's pool share = position ÷ TVL and all LPs stake for the shared rewards. Mechanism model, not price prediction or financial advice; real volume, TVL, and price are unknown and volatile.</div>
+    </div>
+  </section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+
+// ── page tabs ──
+const PAGE_TITLES={
+  presale:'Rooty.fun · Presale Dilution & Yield',
+  lp:'Rooty.fun · LP & Fee-Sharing Simulator'
+};
+function switchPage(page){
+  document.querySelectorAll('#page-tabs button').forEach(b=>b.classList.toggle('on',b.dataset.page===page));
+  document.querySelectorAll('.tab-head').forEach(h=>{h.hidden=h.dataset.for!==page;});
+  $('panel-presale').hidden=page!=='presale';
+  $('panel-lp').hidden=page!=='lp';
+  document.title=PAGE_TITLES[page];
+}
+document.querySelectorAll('#page-tabs button').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));
+
+// ── presale simulator ──
+const RAISES=[1000,10000,30000,60000,100000,250000,500000,1000000,2000000];
+const WALLETS=[10,30,50,70,120,150,200,450,600,800,1000];
+let metric='supply';
+
+const fmtUSD=n=>{if(n>=1e6)return '$'+(n/1e6).toFixed(n>=1e7?1:2)+'M';if(n>=1e3)return '$'+(n/1e3).toFixed(0)+'k';return '$'+n.toLocaleString(undefined,{maximumFractionDigits:n<1?6:2});};
+const fmtTok=n=>{if(n>=1e9)return (n/1e9).toFixed(2)+'B';if(n>=1e6)return (n/1e6).toFixed(2)+'M';if(n>=1e3)return (n/1e3).toFixed(1)+'K';return n.toFixed(0);};
+const fmtPrice=n=>'$'+n.toLocaleString(undefined,{maximumSignificantDigits:3});
+const fmtPct=n=>{if(n===0)return '0%';if(n>=1)return n.toFixed(2)+'%';if(n>=0.001)return n.toFixed(4)+'%';return n.toExponential(2)+'%';};
+const fmtMult=m=>m>=10?m.toFixed(1)+'×':m.toFixed(2)+'×';
+const fmtSign=m=>{const p=(m-1)*100;return (p>=0?'+':'')+p.toFixed(0)+'%';};
+const cls=m=>Math.abs(m-1)<0.02?'even':(m>1?'profit':'loss');
+
+function params(){
+  const supply=+$('supply').value||1, curvePct=+$('curvePct').value||0;
+  const curveTarget=+$('curveTarget').value||0, migMc=+$('migMc').value||0;
+  const months=+$('months').value||0, discount=(+$('discount').value||0)/100;
+  const pt=(+$('passthru').value||0)/100;
+  const s=curvePct/100, pool=supply*s, launch=migMc/supply;
+  const T=months/12;
+  const df=1/Math.pow(1+discount, T/2);
+  const beSpot=migMc*s;
+  const denom=1 - s*pt*df;
+  const beYield= denom>0 ? s*(migMc - pt*df*curveTarget)/denom : Infinity;
+  return {supply,curvePct,curveTarget,migMc,pt,s,pool,launch,df,beSpot,beYield};
+}
+function supportedMC(R,p){
+  const Y=Math.max(0,R-p.curveTarget);
+  return p.migMc + p.pt*p.df*Y;
+}
+function plYield(R,p){return p.s*supportedMC(R,p)/R;}
+function plSpot(R,p){return p.beSpot/R;}
+
+function renderPresale(){
+  const p=params();
+  $('ptv').textContent=Math.round(p.pt*100)+'%';
+  $('d-pool').textContent=fmtTok(p.pool)+' ('+p.curvePct+'%)';
+  $('d-launch').textContent=fmtPrice(p.launch);
+  $('d-be1').textContent=fmtUSD(p.beSpot);
+  $('d-be2').textContent=isFinite(p.beYield)?fmtUSD(p.beYield):'—';
+  $('d-floor').textContent=fmtSign(p.s)+' ('+p.curvePct+'% owned)';
+
+  $('presale-finding-text').innerHTML=
+    'Spot break-even sits at <b>'+fmtUSD(p.beSpot)+'</b>. Counting the yield stream at '+
+    Math.round(p.pt*100)+'% pass-through, break-even moves to <b>'+(isFinite(p.beYield)?fmtUSD(p.beYield):'—')+'</b> — '+
+    'presalers stay <span class="g">in profit</span> on raises up to there. Beyond it they go <span class="r">underwater</span>, '+
+    'with collective recovery capped at <b>'+fmtSign(p.s)+'</b> no matter how large the raise, since they own only '+p.curvePct+'% of supply.';
+
+  const sb=$('summary-body');sb.innerHTML='';
+  RAISES.forEach(R=>{
+    const eff=R/p.pool, ms=plSpot(R,p), my=plYield(R,p);
+    const smc=supportedMC(R,p), pot=Math.max(0,R-p.curveTarget), below=R<p.curveTarget;
+    const tr=document.createElement('tr'); if(below)tr.className='below';
+    tr.innerHTML=
+      '<td class="rowhead raise">'+fmtUSD(R)+'</td>'+
+      '<td class="dim">'+fmtPrice(eff)+'</td>'+
+      '<td class="'+cls(ms)+'">'+fmtMult(ms)+' <span class="dim">'+fmtSign(ms)+'</span></td>'+
+      '<td>'+fmtUSD(smc)+'</td>'+
+      '<td class="'+cls(my)+'">'+fmtMult(my)+' <span class="dim">'+fmtSign(my)+'</span></td>'+
+      '<td class="dim">'+(pot>0?fmtUSD(pot):'—')+'</td>';
+    sb.appendChild(tr);
+  });
+
+  const pivotR=RAISES.find((R,i)=>{const prev=i>0?RAISES[i-1]:0;const be=metric==='spot'?p.beSpot:p.beYield;return prev<be&&R>=be;});
+  $('matrix-head').innerHTML='<th class="rowhead">Wallet \\ Raise</th>'+
+    RAISES.map(R=>'<th class="'+(R===pivotR&&(metric==='spot'||metric==='yield')?'col-pivot':'')+'">'+fmtUSD(R)+'</th>').join('');
+  const mb=$('matrix-body');mb.innerHTML='';
+  WALLETS.forEach(C=>{
+    let row='<td class="rowhead">'+fmtUSD(C)+'</td>';
+    RAISES.forEach(R=>{
+      const frac=C/R, ms=plSpot(R,p), my=plYield(R,p);
+      const pivot=(R===pivotR&&(metric==='spot'||metric==='yield'))?' col-pivot':'';
+      let v='',c='';
+      if(metric==='supply')v=fmtPct(frac*p.curvePct);
+      else if(metric==='tokens')v=fmtTok(frac*p.pool);
+      else if(metric==='spot'){v=fmtMult(ms);c=cls(ms);}
+      else {v=fmtMult(my);c=cls(my);}
+      row+='<td class="'+c+pivot+'">'+v+'</td>';
+    });
+    const tr=document.createElement('tr');tr.innerHTML=row;mb.appendChild(tr);
+  });
+}
+document.querySelectorAll('#metric-toggle button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#metric-toggle button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');metric=b.dataset.m;renderPresale();
+}));
+['supply','curvePct','curveTarget','migMc','months','discount','passthru'].forEach(id=>$(id).addEventListener('input',renderPresale));
+
+// ── LP simulator ──
+const TURNS=[0.05,0.1,0.25,0.5,0.8,1,2,3,5];
+const fmtUSDLp=n=>{const a=Math.abs(n);if(a>=1e6)return '$'+(n/1e6).toFixed(2)+'M';if(a>=1e3)return '$'+(n/1e3).toFixed(1)+'k';return '$'+n.toLocaleString(undefined,{maximumFractionDigits:0});};
+const fmtAPR=n=>{if(!isFinite(n))return '—';if(n>=1000)return (n/1000).toFixed(1)+'k%';return n.toFixed(n>=100?0:1)+'%';};
+const fmtPctSigned=n=>(n>=0?'+':'')+n.toFixed(1)+'%';
+
+function creatorFee(mc){
+  const b=[[59000,0.30],[300000,0.95],[500000,0.90],[700000,0.85],[900000,0.80],[2000000,0.75],
+  [3000000,0.70],[4000000,0.65],[5000000,0.60],[6000000,0.55],[7000000,0.50],[8000000,0.45],
+  [9000000,0.40],[10000000,0.35],[11000000,0.30],[12000000,0.28],[13000000,0.25],[14000000,0.23],
+  [15000000,0.20],[16000000,0.18],[17000000,0.15],[18000000,0.13],[19000000,0.10],[20000000,0.08]];
+  for(const [cap,fee] of b){if(mc<cap)return fee;}
+  return 0.05;
+}
+function ilFrac(k){return (2*Math.sqrt(k)/(1+k))-1;}
+
+function lpVals(){
+  const mc=+$('mc').value||0, tvl=+$('tvl').value||1, turn=(+$('turnover').value||0)/100;
+  const share=(+$('share').value||0)/100, pos=+$('pos').value||0, days=+$('days').value||0;
+  const pool=$('pool').value, k=1+(+$('pmove').value||0)/100;
+  const lpFee=pool==='noncanon'?0.25:0.20;
+  const cFee=pool==='noncanon'?0:creatorFee(mc);
+  return {mc,tvl,turn,share,pos,days,pool,k,lpFee,cFee};
+}
+function aprFor(turn,v){
+  const dv=turn*v.mc;
+  const baseDaily=dv*(v.lpFee/100)*(v.pos/v.tvl);
+  const shareDaily=dv*(v.cFee/100)*v.share*(v.pos/v.tvl);
+  const base=v.pos>0?baseDaily/v.pos*365*100:0;
+  const sh=v.pos>0?shareDaily/v.pos*365*100:0;
+  return {dv,base,sh,total:base+sh,baseDaily,shareDaily};
+}
+
+function renderLp(){
+  const v=lpVals();
+  $('tov').textContent=(v.turn).toFixed(2)+'×';
+  $('shv').textContent=Math.round(v.share*100)+'%';
+  $('pmv').textContent=fmtPctSigned((v.k-1)*100);
+
+  const cur=aprFor(v.turn,v);
+  $('c-cfee').textContent=v.cFee.toFixed(2)+'%';
+  $('c-cfee-s').textContent=v.pool==='noncanon'?'non-canonical · 0%':'USDC canonical band';
+  $('c-vol').textContent=fmtUSDLp(cur.dv)+'/day';
+  $('c-apr-base').textContent=fmtAPR(cur.base);
+  $('c-apr-share').textContent=fmtAPR(cur.sh);
+  $('c-apr-total').textContent=fmtAPR(cur.total);
+
+  const il=ilFrac(v.k)*100;
+  $('c-il').textContent=il.toFixed(1)+'%';
+
+  const feeYieldPct=v.pos>0?((cur.baseDaily+cur.shareDaily)*v.days)/v.pos*100:0;
+  const netVsHold=feeYieldPct+il;
+  $('c-il-s').textContent='net vs HODL '+fmtPctSigned(netVsHold);
+
+  $('lp-finding-text').innerHTML=
+    'At '+(v.turn).toFixed(2)+'× turnover and '+Math.round(v.share*100)+'% shared, this position runs about <b>'+fmtAPR(cur.total)+' APR</b> '+
+    '('+fmtAPR(cur.base)+' base + <b>'+fmtAPR(cur.sh)+'</b> from shared creator rewards). '+
+    'Over '+v.days+' days that is '+fmtPctSigned(feeYieldPct)+' in fees against '+fmtPctSigned(il)+' impermanent loss at the set price move — '+
+    'net <span class="'+(netVsHold>=0?'g':'r')+'">'+fmtPctSigned(netVsHold)+'</span> versus simply holding the token.';
+
+  const sb=$('sens-body');sb.innerHTML='';
+  TURNS.forEach(t=>{
+    const a=aprFor(t,v);
+    const hot=Math.abs(t-v.turn)<1e-9;
+    const tr=document.createElement('tr');if(hot)tr.className='hot';
+    tr.innerHTML='<td class="rowhead">'+t.toFixed(2)+'×</td>'+
+      '<td class="dim">'+fmtUSDLp(a.dv)+'</td>'+
+      '<td class="base">'+fmtAPR(a.base)+'</td>'+
+      '<td class="share">'+fmtAPR(a.sh)+'</td>'+
+      '<td class="total">'+fmtAPR(a.total)+'</td>';
+    sb.appendChild(tr);
+  });
+}
+['mc','tvl','turnover','share','pool','pos','days','pmove'].forEach(id=>$(id).addEventListener('input',renderLp));
+
+renderPresale();
+renderLp();
+</script>
+</body>
+</html>
